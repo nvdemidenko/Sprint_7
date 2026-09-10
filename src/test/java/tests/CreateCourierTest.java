@@ -1,4 +1,4 @@
-package test;
+package tests;
 
 import io.qameta.allure.*;
 import io.restassured.http.ContentType;
@@ -14,10 +14,10 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @Epic("Создание курьера")
-class CreateCourierTest extends test.ApiTestBase {
+class CreateCourierTest extends ApiTestBase {
 
     private final client.CourierClient client = new client.CourierClient();
-    //private Number createdCourierId = null;
+    private Number courierId = null;
 
     @Test
     @DisplayName("Позитивный: можно создать курьера")
@@ -41,7 +41,7 @@ class CreateCourierTest extends test.ApiTestBase {
     void createValidCourier() {
         Courier courier = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
         client.create(courier);
-        client.loginAndGetId(courier);
+        this.courierId = client.loginAndGetId(courier);
     }
 
     @Test
@@ -125,10 +125,10 @@ class CreateCourierTest extends test.ApiTestBase {
  */
     @AfterEach
     void tearDown() {
-        if (client.courierId != null) {
-            client.deleteCourier(client.courierId);
+        if (this.courierId != null) {
+            client.deleteCourier(this.courierId);
             // Обнуляем переменную для следующего теста
-            client.courierId = null;
+            this.courierId = null;
         }
     }
 }

@@ -1,4 +1,4 @@
-package test;
+package tests;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Epic("Список заказов")
-class GetOrdersListTest extends test.ApiTestBase {
+class GetOrdersListTest extends ApiTestBase {
 
     @Test
     @DisplayName("Получение списка всех заказов")

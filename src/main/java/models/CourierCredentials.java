@@ -1,6 +1,6 @@
 package models;
 
-public class CourierCredentials {
+public class CourierCredentials implements Credentials {
     private String login;
     private String password;
 

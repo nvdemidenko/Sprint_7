@@ -1,10 +1,12 @@
-package test;
+package tests;
 
+import client.CourierClient;
 import io.qameta.allure.*;
 import io.restassured.http.ContentType;
 //import io.restassured.response.Response;
 import models.Courier;
 import models.CourierCredentials;
+import models.Credentials;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -14,12 +16,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @Epic("Авторизация курьера")
-class LoginCourierTest extends test.ApiTestBase {
+class LoginCourierTest extends ApiTestBase {
 
-    static CourierCredentials credentials;
+    static private Courier courier;
 
-    private static final client.CourierClient client = new client.CourierClient();
-    //private Number createdCourierId = null;
+    private static final CourierClient client = new CourierClient();
+    private static Number createdCourierId = null;
 
     //private final String testLogin = "test_login_for_auth";
     //private final String testPassword = "VerySecretPass_456";
@@ -29,32 +31,17 @@ class LoginCourierTest extends test.ApiTestBase {
         // Создаем тестового пользователя перед каждым запуском тестов этого класса
         //var credentials = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
         //given().body(credentials).post("/api/v1/courier");
-        Courier courier = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
+        courier = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
         client.create(courier);
-        credentials = new CourierCredentials(courier.getLogin(), courier.getPassword());
-        //client.loginAndGetId(courier);
+        createdCourierId = client.loginAndGetId(courier);
     }
-/*
-    @AfterEach
-    void tearDown() {
-        // Удаляем пользователя после тестов
-        var idResponse = given()
-                .body(new CourierCredentials(testLogin, testPassword))
-                .when()
-                .post("/api/v1/courier/login")
-                .then()
-                .extract().path("id");
 
-        if (idResponse != null) {
-            given().delete("/api/v1/courier/" + idResponse);
-        }
-*/
     @AfterEach
     void tearDown() {
-        if (client.courierId != null) {
-            client.deleteCourier(client.courierId);
+        if (createdCourierId != null) {
+            client.deleteCourier(createdCourierId);
             // Обнуляем переменную для следующего теста
-            //client.courierId = null;
+            createdCourierId = null;
         }
 }
 
@@ -62,10 +49,9 @@ class LoginCourierTest extends test.ApiTestBase {
     @DisplayName("Позитивный: курьер может авторизоваться")
     @Description("Корректные данные должны вернуть ID курьера и статус 200")
     void canLoginWithValidData() {
-
-        client.loginAndGetId(credentials);
-
-        assertThat(client.courierId).describedAs("Поле 'id' должно присутствовать и быть корректным числом")
+        Number courierId = client.loginAndGetId(courier);
+        assertThat(courierId)
+                .describedAs("Поле 'id' должно присутствовать и быть корректным числом")
                 .isNotNull();
     }
 
@@ -75,7 +61,7 @@ class LoginCourierTest extends test.ApiTestBase {
     void wrongPasswordReturnsError() {
         given()
                 .contentType(ContentType.JSON)
-                .body(new CourierCredentials(credentials.getLogin(), "WrongPass"))
+                .body(new CourierCredentials(courier.getLogin(), "WrongPass"))
                 .when()
                 .post("/api/v1/courier/login")
                 .then()
@@ -102,13 +88,13 @@ class LoginCourierTest extends test.ApiTestBase {
     @ParameterizedTest(name = "Поле {0} отсутствует")
     @ValueSource(strings = {"login", "password"})
     void fieldMissingInLoginRequest(String missingField) {
-        CourierCredentials creds;
+        Credentials creds;
         switch (missingField) {
             case "login": // Создаем объект без логина
-                creds = new CourierCredentials(null, credentials.getPassword());
+                creds = new CourierCredentials(null, courier.getPassword());
                 break;
             case "password": // Создаем объект без пароля
-                creds = new CourierCredentials(credentials.getLogin(), null);
+                creds = new CourierCredentials(courier.getLogin(), null);
                 break;
              default: // Эта ветка сработает только если параметризация теста сломается
                  throw new IllegalArgumentException("Неизвестное поле для проверки: " + missingField);

@@ -1,4 +1,4 @@
-package test;
+package tests;
 
 import io.qameta.allure.*;
 import models.Order;
@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @Epic("Создание заказа")
-class CreateOrderTest extends test.ApiTestBase {
+class CreateOrderTest extends ApiTestBase {
 
     @Test
     @DisplayName("Заказ создается успешно")
