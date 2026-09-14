@@ -1,0 +1,92 @@
+package tests;
+
+import io.qameta.allure.*;
+import io.restassured.http.ContentType;
+import models.Courier;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
+
+@Epic("Создание курьера")
+class CreateCourierTest extends ApiTestBase {
+
+    private final client.CourierClient client = new client.CourierClient();
+    private Number courierId = null;
+
+    @Test
+    @DisplayName("Позитивный: можно создать курьера")
+    @Description("Успешное создание нового курьера с валидными данными")
+    void createValidCourier() {
+        Courier courier = new Courier(generateUniqueLogin(), "SomeP@ssw0rd", "Иванчик");
+        client.create(courier);
+        this.courierId = client.loginAndGetId(courier);
+    }
+
+    @Test
+    @DisplayName("Негативный: нельзя создать двух одинаковых курьеров")
+    @Description("Попытка регистрации с уже существующим логином должна вернуть ошибку 409")
+    void cannotCreateDuplicateCourier() {
+        String login = generateUniqueLogin();
+        Courier first = new Courier(login, "pass1", "Иван");
+        Courier second = new Courier(login, "pass2", "Петр");
+
+        client.create(first);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(second)
+                .when()
+                .post("/api/v1/courier")
+                .then()
+                .log().ifValidationFails()
+                .statusCode(409)
+                .body("message", equalTo("Этот логин уже используется. Попробуйте другой."));
+    }
+
+    @Description("Сервер должен возвращать 400, если не передано одно из обязательных полей")
+    @ParameterizedTest(name = "Поле [{0}] отсутствует в теле запроса")
+    @ValueSource(strings = {"login", "password", "firstName"})
+    @DisplayName("Негативный: ошибка при отсутствии обязательного поля")
+    void errorWhenFieldIsMissing(String missingField) {
+        Courier incomplete;
+        switch (missingField) {
+            case "login": // Не передаем логин, чтобы проверить ошибку валидации этого поля
+                 incomplete = new Courier(null, "qwerty123", "Ivan");
+                 break;
+            case "password": // Не передаем пароль
+                incomplete = new Courier("valid_login", null, "Ivan");
+                break;
+            case "firstName": // Не передаем имя
+                incomplete = new Courier("valid_login", "qwerty123", null);
+                break;
+
+            default: // Защитная ветка на случай, если в тест попадет некорректное значение
+                throw new IllegalArgumentException("Неизвестный сценарий для missingField: " + missingField);
+        }
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(incomplete)
+                .when()
+                .post("/api/v1/courier")
+                .then()
+                .log()
+                .ifValidationFails()
+                .statusCode(400)
+                .body("message", containsString("Недостаточно данных для создания учетной записи"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (this.courierId != null) {
+            client.deleteCourier(this.courierId);
+            // Обнуляем переменную для следующего теста
+            this.courierId = null;
+        }
+    }
+}
