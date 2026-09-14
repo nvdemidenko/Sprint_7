@@ -1,7 +1,6 @@
 package tests;
 
 import io.qameta.allure.*;
-import io.restassured.http.ContentType;
 import models.Order;
 import org.junit.jupiter.api.DisplayName;
 
@@ -40,7 +39,6 @@ class CreateOrderTest extends ApiTestBase {
                 .statusCode(201)
                 .body("track", notNullValue()) // Проверка остается здесь // === КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ ВМЕСТО
                 .extract().path("track");
-        int k = 1;
     }
 
     @DisplayName("Цвета заказа: позитивные и негативные сценарии")
@@ -72,23 +70,6 @@ class CreateOrderTest extends ApiTestBase {
                 .body("track", notNullValue())
                 // Извлекаем значение поля "track" из JSON
                 .extract().path("track");
-
-        int k = 0;
-
-
-        /*
-        if (expectedStatus == 201) {
-            given()
-                    .contentType(ContentType.JSON)
-                    .body(order)
-                    .queryParam("color", (Object) colorArray)
-                    .when()
-                    .post("/api/v1/orders")
-                    .then()
-                    .body("track", notNullValue());
-        }
-
-         */
     }
 
     @AfterEach
@@ -112,15 +93,4 @@ class CreateOrderTest extends ApiTestBase {
                     .statusCode(200)
                     .body(containsString("\"ok\":true"));
     }
-/*
-    // Вспомогательный класс для тела запроса отмены
-    public static class CancelRequest {
-        public Integer track;
-
-        public CancelRequest(Integer track) {
-            this.track = track;
-        }
-    }
-
- */
 }
