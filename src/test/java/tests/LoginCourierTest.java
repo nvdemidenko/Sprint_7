@@ -3,7 +3,6 @@ package tests;
 import client.CourierClient;
 import io.qameta.allure.*;
 import io.restassured.http.ContentType;
-//import io.restassured.response.Response;
 import models.Courier;
 import models.CourierCredentials;
 import models.Credentials;
@@ -23,15 +22,10 @@ class LoginCourierTest extends ApiTestBase {
     private static final CourierClient client = new CourierClient();
     private static Number createdCourierId = null;
 
-    //private final String testLogin = "test_login_for_auth";
-    //private final String testPassword = "VerySecretPass_456";
 
     @BeforeAll
     static void setUp() {
-        // Создаем тестового пользователя перед каждым запуском тестов этого класса
-        //var credentials = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
-        //given().body(credentials).post("/api/v1/courier");
-        courier = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
+        courier = new Courier(generateUniqueLogin(), "S0MePassw0rd", "Иванушка");
         client.create(courier);
         createdCourierId = client.loginAndGetId(courier);
     }

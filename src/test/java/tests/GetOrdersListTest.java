@@ -44,7 +44,8 @@ class GetOrdersListTest extends ApiTestBase {
 
             // Пример проверки типа конкретного поля первого заказа
             assertThat(firstOrder.get("id")).isInstanceOf(Integer.class);
-            assertThat((Integer) firstOrder.get("id")).isPositive(); // ID должен быть > 0
+            // ID должен быть > 0
+            assertThat((Integer) firstOrder.get("id")).isPositive();
         }
 
     }

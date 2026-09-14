@@ -3,7 +3,6 @@ package tests;
 import io.qameta.allure.*;
 import io.restassured.http.ContentType;
 import models.Courier;
-//import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.*;
@@ -22,24 +21,8 @@ class CreateCourierTest extends ApiTestBase {
     @Test
     @DisplayName("Позитивный: можно создать курьера")
     @Description("Успешное создание нового курьера с валидными данными")
-    /*void createValidCourier() {
-        Courier courier = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
-
-        createdCourierId = given()
-                .contentType(ContentType.JSON)
-                .body(courier)
-                .when()
-                .post("/api/v1/courier")
-                .then()
-                .log().ifValidationFails()
-                .statusCode(201)
-                .body("ok", equalTo(true))
-                .extract().path("id");
-
-        //assertThat(createdCourierId).isNotNull();
-    }*/
     void createValidCourier() {
-        Courier courier = new Courier(generateUniqueLogin(), "StrongPass123", "Иван");
+        Courier courier = new Courier(generateUniqueLogin(), "SomeP@ssw0rd", "Иванчик");
         client.create(courier);
         this.courierId = client.loginAndGetId(courier);
     }
@@ -52,15 +35,6 @@ class CreateCourierTest extends ApiTestBase {
         Courier first = new Courier(login, "pass1", "Иван");
         Courier second = new Courier(login, "pass2", "Петр");
 
-    /*
-        given()
-                .contentType(ContentType.JSON)
-                .body(first)
-                .when()
-                .post("/api/v1/courier")
-                .then()
-                .statusCode(201);
-    */
         client.create(first);
 
         given()
@@ -106,23 +80,7 @@ class CreateCourierTest extends ApiTestBase {
                 .statusCode(400)
                 .body("message", containsString("Недостаточно данных для создания учетной записи"));
     }
-/*
-    @AfterEach
-    void cleanupCreatedCourier() {
-        // Удаляем только если создание прошло успешно и ID был записан
-        if (createdCourierId != null) {
-            given()
-                .pathParam("id", createdCourierId)
-                .delete("/api/v1/courier/{id}")
-                .then()
-                    .assertThat()
-                    .statusCode(202)
-                    .body("ok", equalTo(true));
-            // Обнуляем переменную для следующего теста
-            createdCourierId = null;
-        }
-    }
- */
+
     @AfterEach
     void tearDown() {
         if (this.courierId != null) {
